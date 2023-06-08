@@ -9,16 +9,18 @@ export class AuthController {
 
   @Post('register')
   async register(@Body() body: RegisterDTO, @Res() res: Response) {
-    const user = await this.authService.register(body);
-    if (!user) {
-      return res.status(400).json({
-        message: 'User already exists',
+    const { success, statusCode, data, message } =
+      await this.authService.register(body);
+
+    if (!success) {
+      return res.status(statusCode).json({
+        message,
       });
     }
 
-    return res.status(201).json({
-      message: 'User created successfully',
-      data: { user },
+    return res.status(statusCode).json({
+      message,
+      data,
     });
   }
 

@@ -6,32 +6,13 @@ import { ServiceResponse } from 'src/interfaces/response.interface';
 
 @Injectable()
 export class AuthService {
-  constructor(
-    private userService: UsersService,
-  ) {}
+  constructor(private userService: UsersService) {}
 
   async login(data: LoginDTO): Promise<ServiceResponse> {
-    const token = await this.userService.authenticate(data);
-
-    if (token) {
-      return {
-        success: true,
-        statusCode: 200,
-        data: {
-          token,
-        }
-      };
-    }
-
-    return {
-      statusCode: 400,
-      success: false,
-      message: 'Invalid credentials',
-    };
+    return await this.userService.authenticate(data);
   }
 
-  async register(data: RegisterDTO): Promise<User> {
-    const user = await this.userService.registerUser(data);
-    return user;
+  async register(data: RegisterDTO): Promise<ServiceResponse> {
+    return await this.userService.registerUser(data);
   }
 }

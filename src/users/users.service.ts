@@ -5,6 +5,8 @@ import { Model } from 'mongoose';
 import { hashSync, compareSync } from 'bcrypt';
 import { ConfigService } from '@nestjs/config';
 import { sign } from 'jsonwebtoken';
+import { ServiceResponse } from 'src/interfaces/response.interface';
+import { LoginDTO, RegisterDTO } from 'src/auth/dto';
 
 @Injectable()
 export class UsersService {
@@ -17,17 +19,35 @@ export class UsersService {
     return await this.userModel.findOne(query);
   }
 
-  async registerUser(data) {
+  async registerUser(data: RegisterDTO): Promise<ServiceResponse> {
+    if (await this.userModel.findOne({ email: data.email })) {
+      return {
+        success: false,
+        statusCode: 400,
+        message: 'User already exists',
+      };
+    }
+
     const user = new this.userModel(data);
     user.password = hashSync(
       data.password,
       parseInt(this.configService.get<string>('BCRYPT_SALT', '10')),
     );
-    return await user.save();
+    await user.save();
+
+    return await this.authenticate(data);
   }
 
-  async authenticate(data) {
+  async authenticate(data: LoginDTO): Promise<ServiceResponse> {
     const user = await this.userModel.findOne({ email: data.email });
+
+    if (!user) {
+      return {
+        success: false,
+        statusCode: 400,
+        message: 'Invalid credentials',
+      };
+    }
 
     if (compareSync(data.password, user.password)) {
       const token = sign(
@@ -35,12 +55,22 @@ export class UsersService {
         this.configService.get<string>('JWT_SECRET', 'secret'),
         {
           algorithm: 'HS256',
-          expiresIn: this.configService.get<string|number>('JWT_EXPIRY', '1d'),
+          expiresIn: this.configService.get<string | number>(
+            'JWT_EXPIRY',
+            '1d',
+          ),
         },
       );
 
-      user.password = undefined;
-      return token;
+      // user.password = undefined;
+      return {
+        success: true,
+        statusCode: 200,
+        data: {
+          token,
+          user,
+        },
+      };
     }
   }
 }
