@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { User } from './schema/user.schema';
 import { Model } from 'mongoose';
-import { hashSync, compareSync } from 'bcrypt';
+import { hashSync, compareSync, compare } from 'bcrypt';
 import { ConfigService } from '@nestjs/config';
 import { sign } from 'jsonwebtoken';
 import { ServiceResponse } from 'src/interfaces/response.interface';
@@ -49,7 +49,9 @@ export class UsersService {
       };
     }
 
-    if (compareSync(data.password, user.password)) {
+    const result = await compare(data.password, user.password);
+
+    if (result) {
       const token = sign(
         { id: user._id },
         this.configService.get<string>('JWT_SECRET', 'secret'),
@@ -62,7 +64,6 @@ export class UsersService {
         },
       );
 
-      // user.password = undefined;
       return {
         success: true,
         statusCode: 200,
@@ -72,5 +73,11 @@ export class UsersService {
         },
       };
     }
+
+    return {
+      success: false,
+      statusCode: 400,
+      message: 'Invalid credentials',
+    };
   }
 }
