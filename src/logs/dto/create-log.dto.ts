@@ -15,5 +15,6 @@ export class CreateLogDto {
   app: string;
 
   @IsIP()
+  @IsOptional()
   ip?: string;
 }
