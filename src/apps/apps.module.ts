@@ -14,7 +14,7 @@ import { UsersService } from 'src/users/users.service';
         name: App.name,
         schema: AppsSchema,
       },
-      { name: 'User', schema: UserSchema }
+      { name: User.name, schema: UserSchema }
     ]),
   ],
   controllers: [AppsController],

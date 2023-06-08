@@ -19,10 +19,7 @@ export class LogsController {
       });
     }
 
-    return res.status(statusCode).json({
-      message,
-      data,
-    });
+    return res.status(statusCode).json(data);
   }
 
   @Post()

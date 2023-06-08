@@ -11,7 +11,6 @@ import { Log, LogsSchema } from './schema/logs.schema';
 import { AuthMiddleware } from 'src/auth/auth.middleware';
 import { UsersService } from 'src/users/users.service';
 import { User, UserSchema } from 'src/users/schema/user.schema';
-import { App, AppsSchema } from 'src/apps/schema/apps.schema';
 
 @Module({
   imports: [
