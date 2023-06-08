@@ -26,6 +26,9 @@ export class Log {
     type: SchemaTypes.ObjectId,
   })
   app: string;
+
+  @Prop()
+  ip?: string;
 }
 
 export const LogsSchema = SchemaFactory.createForClass(Log);

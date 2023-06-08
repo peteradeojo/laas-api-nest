@@ -1,4 +1,4 @@
-import { IsIn, IsMongoId, IsOptional, IsString } from 'class-validator';
+import { IsIP, IsIn, IsMongoId, IsOptional, IsString } from 'class-validator';
 import { LogLevels } from '../schema/logs.schema';
 
 export class CreateLogDto {
@@ -13,4 +13,7 @@ export class CreateLogDto {
   @IsMongoId()
   @IsOptional()
   app: string;
+
+  @IsIP()
+  ip?: string;
 }

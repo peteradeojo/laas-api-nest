@@ -39,6 +39,8 @@ export class LogsController {
       });
     }
 
+    body.ip ??= req.ip;
+
     const { success, statusCode, data, message } =
       await this.logService.saveLog(body, appToken as string);
 
