@@ -39,6 +39,10 @@ export class LogsService {
     };
   }
 
+  async deleteLog(id: string) {
+    await this.logModel.findByIdAndDelete(id);
+  }
+
   async clearLogs(app: string) {
     await this.logModel.deleteMany({ app });
   }

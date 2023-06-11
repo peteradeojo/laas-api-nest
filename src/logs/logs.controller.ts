@@ -36,6 +36,17 @@ export class LogsController {
     return res.status(statusCode).json(data);
   }
 
+  @Delete('/:id/delete')
+  async deleteLog(
+    @Param('id') id: string,
+    @Res() res: Response,
+  ): SentResponse {
+    await this.logService.deleteLog(id);
+    return res.status(200).json({
+      message: 'Log deleted successfully',
+    });
+  }
+
   @Delete('/:app')
   async clearLogs(
     @Param('app') app: string,
