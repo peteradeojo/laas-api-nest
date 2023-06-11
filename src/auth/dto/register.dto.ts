@@ -1,5 +1,10 @@
-import { IsEmail, IsNotEmpty, IsString, IsStrongPassword, Equals, Matches, ValidateIf } from 'class-validator';
-import {PickType} from '@nestjs/mapped-types';
+import {
+  IsEmail,
+  IsNotEmpty,
+  IsString,
+  ValidateIf,
+} from 'class-validator';
+import { PickType } from '@nestjs/mapped-types';
 
 export class RegisterDTO {
   @IsNotEmpty()
@@ -9,10 +14,12 @@ export class RegisterDTO {
   @IsEmail()
   readonly email: string;
 
-  @IsStrongPassword()
+  @IsNotEmpty()
+  @IsString()
   readonly password: string;
 
-  @IsStrongPassword()
+  @IsNotEmpty()
+  @IsString()
   @ValidateIf((o) => {
     return o.password !== o.password_confirmation;
   })
