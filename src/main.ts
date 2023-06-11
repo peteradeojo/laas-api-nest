@@ -11,6 +11,8 @@ async function bootstrap() {
   //   defaultVersion: '1',
   // });
 
+  app.enableCors();
+
   app.useGlobalPipes(
     new ValidationPipe({
       stopAtFirstError: true,
