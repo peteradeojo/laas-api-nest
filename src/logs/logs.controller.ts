@@ -1,4 +1,14 @@
-import { Controller, Get, Post, Body, Param, Res, Req, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Res,
+  Req,
+  Query,
+  Delete,
+} from '@nestjs/common';
 import { Request, Response, query } from 'express';
 import { SentResponse } from 'src/interfaces/response.interface';
 import { LogsService } from './logs.service';
@@ -9,7 +19,11 @@ export class LogsController {
   constructor(private readonly logService: LogsService) {}
 
   @Get(':app')
-  async getLogs(@Param('app') app: string, @Res() res: Response, @Query() query): SentResponse {
+  async getLogs(
+    @Param('app') app: string,
+    @Res() res: Response,
+    @Query() query,
+  ): SentResponse {
     const { success, data, statusCode, message } =
       await this.logService.getLogs(app, query.page, query.count);
 
@@ -20,6 +34,17 @@ export class LogsController {
     }
 
     return res.status(statusCode).json(data);
+  }
+
+  @Delete('/:app')
+  async clearLogs(
+    @Param('app') app: string,
+    @Res() res: Response,
+  ): SentResponse {
+    await this.logService.clearLogs(app);
+    return res.status(200).json({
+      message: 'Logs cleared successfully',
+    });
   }
 
   @Post()
@@ -43,7 +68,7 @@ export class LogsController {
 
     return res.status(statusCode).json({
       message,
-      data
+      data,
     });
   }
 }

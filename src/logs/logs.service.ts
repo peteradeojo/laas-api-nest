@@ -39,6 +39,10 @@ export class LogsService {
     };
   }
 
+  async clearLogs(app: string) {
+    await this.logModel.deleteMany({ app });
+  }
+
   private verifyAppToken(token: string): string {
     const payload = verify(
       token,
