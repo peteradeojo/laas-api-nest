@@ -35,7 +35,7 @@ export class AppsController {
 
     return res.status(200).json({
       message: 'Apps fetched successfully',
-      data,
+      data: data.apps,
     });
   }
 

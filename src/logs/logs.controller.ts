@@ -1,5 +1,5 @@
-import { Controller, Get, Post, Body, Param, Res, Req } from '@nestjs/common';
-import { Request, Response } from 'express';
+import { Controller, Get, Post, Body, Param, Res, Req, Query } from '@nestjs/common';
+import { Request, Response, query } from 'express';
 import { SentResponse } from 'src/interfaces/response.interface';
 import { LogsService } from './logs.service';
 import { CreateLogDto } from './dto/create-log.dto';
@@ -9,9 +9,9 @@ export class LogsController {
   constructor(private readonly logService: LogsService) {}
 
   @Get(':app')
-  async getLogs(@Param('app') app: string, @Res() res: Response): SentResponse {
+  async getLogs(@Param('app') app: string, @Res() res: Response, @Query() query): SentResponse {
     const { success, data, statusCode, message } =
-      await this.logService.getLogs(app);
+      await this.logService.getLogs(app, query.page, query.count);
 
     if (!success) {
       return res.status(statusCode).json({

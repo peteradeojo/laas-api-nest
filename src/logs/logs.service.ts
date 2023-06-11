@@ -14,10 +14,18 @@ export class LogsService {
     private readonly config: ConfigService,
   ) {}
 
-  async getLogs(appId: string, page: number = 1, count: number = 20): Promise<ServiceResponse> {
+  async getLogs(
+    appId: string,
+    page: number = 1,
+    count: number = 20,
+  ): Promise<ServiceResponse> {
     const query = this.logModel.find({ app: appId });
     const total = await query.clone().countDocuments().exec();
-    const logs = await query.skip((page - 1) * count).limit(count).exec();
+    const logs = await query
+      .skip((page - 1) * count)
+      .limit(count)
+      .sort({ createdAt: -1 })
+      .exec();
 
     return {
       success: true,
@@ -32,7 +40,10 @@ export class LogsService {
   }
 
   private verifyAppToken(token: string): string {
-    const payload = verify(token, this.config.get<string>('JWT_SECRET', 'secret'));
+    const payload = verify(
+      token,
+      this.config.get<string>('JWT_SECRET', 'secret'),
+    );
     // console.log(payload);
     return (payload as any).id;
   }

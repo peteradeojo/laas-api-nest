@@ -52,6 +52,7 @@ export class UsersService {
     const result = await compare(data.password, user.password);
 
     if (result) {
+      user.password = undefined;
       const token = sign(
         { id: user._id },
         this.configService.get<string>('JWT_SECRET', 'secret'),
