@@ -11,6 +11,7 @@ import { Log, LogsSchema } from './schema/logs.schema';
 import { AuthMiddleware } from 'src/auth/auth.middleware';
 import { UsersService } from 'src/users/users.service';
 import { User, UserSchema } from 'src/users/schema/user.schema';
+import { LogsGateway } from './logs.gateway';
 
 @Module({
   imports: [
@@ -18,7 +19,7 @@ import { User, UserSchema } from 'src/users/schema/user.schema';
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
   ],
   controllers: [LogsController],
-  providers: [LogsService, UsersService],
+  providers: [LogsService, UsersService, LogsGateway],
 })
 export class LogsModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

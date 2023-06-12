@@ -8,6 +8,7 @@ import {
   Req,
   Query,
   Delete,
+  Inject,
 } from '@nestjs/common';
 import { Request, Response, query } from 'express';
 import { SentResponse } from 'src/interfaces/response.interface';
@@ -16,7 +17,9 @@ import { CreateLogDto } from './dto/create-log.dto';
 
 @Controller('logs')
 export class LogsController {
-  constructor(private readonly logService: LogsService) {}
+  constructor(
+    private readonly logService: LogsService,
+  ) {}
 
   @Get(':app')
   async getLogs(
@@ -37,10 +40,7 @@ export class LogsController {
   }
 
   @Delete('/:id/delete')
-  async deleteLog(
-    @Param('id') id: string,
-    @Res() res: Response,
-  ): SentResponse {
+  async deleteLog(@Param('id') id: string, @Res() res: Response): SentResponse {
     await this.logService.deleteLog(id);
     return res.status(200).json({
       message: 'Log deleted successfully',

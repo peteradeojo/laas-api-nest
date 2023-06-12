@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Log, LogLevels } from './schema/logs.schema';
@@ -6,12 +6,14 @@ import { ServiceResponse } from 'src/interfaces/response.interface';
 import { CreateLogDto } from './dto/create-log.dto';
 import { verify } from 'jsonwebtoken';
 import { ConfigService } from '@nestjs/config';
+import { LogsGateway } from './logs.gateway';
 
 @Injectable()
 export class LogsService {
   constructor(
     @InjectModel(Log.name) private readonly logModel: Model<Log>,
     private readonly config: ConfigService,
+    @Inject(LogsGateway) private readonly logsGateway: LogsGateway,
   ) {}
 
   async getLogs(
@@ -63,6 +65,8 @@ export class LogsService {
     data.app = this.verifyAppToken(appToken);
     data.level ??= LogLevels.DEBUG;
     const log = await this.logModel.create(data);
+
+    this.logsGateway.sendLog(data.app, log);
 
     return {
       success: true,
