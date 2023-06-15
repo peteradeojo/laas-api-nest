@@ -76,4 +76,8 @@ export class AppsService {
       data: app ,
     };
   }
+
+  async getAppCount() {
+    return await this.appsModel.countDocuments();
+  }
 }
