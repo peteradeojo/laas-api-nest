@@ -92,11 +92,7 @@ export class UsersService {
     const limit = query.count || 20;
 
     try {
-      const userquery = this.userModel.find({
-        $where: function () {
-          this.role !== 'admin'
-        }
-      });
+      const userquery = this.userModel.find({}).where({ role: { $ne: 'admin' }});
 
       let users: any = null;
 
