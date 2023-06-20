@@ -26,7 +26,7 @@ export class AuthMiddleware implements NestMiddleware {
       return res.status(401).json({ message: 'Unauthorized' });
     }
 
-    user.password = undefined;
+    // user.password = undefined;
     (req as any).user = user;
     return next();
   }

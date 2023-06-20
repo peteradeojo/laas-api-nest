@@ -12,10 +12,11 @@ export class AppsService {
   constructor(
     @InjectModel(App.name) private readonly appsModel: Model<App>,
     private configService: ConfigService,
-  ) {}
+  ) { }
 
-  async getApps(id: string): Promise<ServiceResponse> {
-    const apps = await this.appsModel.find({ user: id }, '-user');
+  async getApps(userId: string): Promise<ServiceResponse> {
+    const apps = await this.appsModel.find({ user: userId }, '-user');
+
     return {
       success: true,
       statusCode: 200,
@@ -73,7 +74,7 @@ export class AppsService {
     return {
       success: true,
       statusCode: 200,
-      data: app ,
+      data: app,
     };
   }
 

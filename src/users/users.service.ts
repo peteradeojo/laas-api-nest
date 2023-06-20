@@ -16,8 +16,10 @@ export class UsersService {
     @InjectModel(User.name) private readonly userModel: Model<User>,
   ) { }
 
-  async findOne(query: object) {
-    return await this.userModel.findOne(query);
+  async findOne(query: object): Promise<Readonly<any>> {
+    const user = await this.userModel.findOne(query);
+    user.password = undefined;
+    return user;
   }
 
   async registerUser(data: RegisterDTO): Promise<ServiceResponse> {
@@ -92,17 +94,17 @@ export class UsersService {
     const limit = query.count || 20;
 
     try {
-      const userquery = this.userModel.find({}).where({ role: { $ne: 'admin' }});
-
-      let users: any = null;
+      let userquery = this.userModel.find({}); //.where({ role: { $ne: 'admin' } });
 
       if (isRecent) {
         const date = (new Date()).valueOf() - (1000 * 60 * 60 * 24 * 5)
-        users = await userquery.where({ createdAt: { $gte: new Date(date) } }).sort({ createdAt: -1 }).limit(limit);
+        userquery = userquery.where({ createdAt: { $gte: new Date(date) } }).limit(limit);
       } else {
         const page = query.page || 1;
-        users = await userquery.skip(page).limit(limit).exec();
+        userquery = userquery.skip((page - 1) * limit).limit(limit);
       }
+
+      const users = await userquery.sort({ createdAt: -1 }).exec();
 
       return {
         success: true,
