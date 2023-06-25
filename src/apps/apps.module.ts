@@ -1,4 +1,4 @@
-import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule, RequestMethod } from '@nestjs/common';
 import { AppsController } from './apps.controller';
 import { AppsService } from './apps.service';
 import { MongooseModule } from '@nestjs/mongoose';
@@ -18,10 +18,14 @@ import { UsersService } from 'src/users/users.service';
     ]),
   ],
   controllers: [AppsController],
-  providers: [AppsService, UsersService],
+  providers: [AppsService, UsersService, AuthMiddleware],
 })
 export class AppsModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(AuthMiddleware).forRoutes(AppsController);
+    consumer.apply(AuthMiddleware).forRoutes({
+      path: 'apps',
+      version: '*',
+      method: RequestMethod.ALL,
+    });
   }
 }

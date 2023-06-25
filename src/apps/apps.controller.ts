@@ -1,11 +1,11 @@
-import { Body, Controller, Post, Get, Req, Res, Param } from '@nestjs/common';
+import { Body, Controller, Post, Get, Req, Res, Param, Patch, UseInterceptors } from '@nestjs/common';
 import { AppsDto } from './dto/apps.dto';
 import { AppsService } from 'src/apps/apps.service';
 import { Request, Response } from 'express';
 
 @Controller('apps')
 export class AppsController {
-  constructor(private readonly appsService: AppsService) {}
+  constructor(private readonly appsService: AppsService) { }
 
   @Post('/new')
   async newApp(
@@ -71,6 +71,22 @@ export class AppsController {
 
     return res.status(200).json({
       message: 'App token generated successfully',
+      data: response.data,
+    });
+  }
+
+  @Patch(':id/update')
+  async updateApp(@Param('id') id: string, @Body() body: AppsDto, @Res() res: Response) {
+    const response = await this.appsService.updateApp(id, body);
+
+    if (!response.success) {
+      return res.status(response.statusCode || 500).json({
+        message: response.message || 'Something went wrong',
+      });
+    }
+
+    return res.status(200).json({
+      message: response.message,
       data: response.data,
     });
   }

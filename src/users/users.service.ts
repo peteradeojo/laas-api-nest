@@ -1,13 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { User } from './schema/user.schema';
-import { Model } from 'mongoose';
+import { Document, Model } from 'mongoose';
 import { hashSync, compare } from 'bcrypt';
 import { ConfigService } from '@nestjs/config';
 import { sign } from 'jsonwebtoken';
 import { ServiceResponse } from 'src/interfaces/response.interface';
 import { LoginDTO, RegisterDTO } from 'src/auth/dto';
-import { Request, Response } from 'express';
 
 @Injectable()
 export class UsersService {
@@ -19,6 +18,16 @@ export class UsersService {
   async findOne(query: object): Promise<Readonly<any>> {
     const user = await this.userModel.findOne(query);
     user.password = undefined;
+    return user;
+  }
+
+  async getUser(id: string | object): Promise<Document<any, any, User> | undefined> {
+    if (typeof id == 'object') {
+      const user = await this.userModel.findOne(id);
+      return user;
+    }
+
+    const user = await this.userModel.findById(id);
     return user;
   }
 

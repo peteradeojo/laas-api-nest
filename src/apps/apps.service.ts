@@ -81,4 +81,26 @@ export class AppsService {
   async getAppCount() {
     return await this.appsModel.countDocuments();
   }
+
+  async updateApp(id: string, data: AppsDto): Promise<ServiceResponse> {
+    try {
+      const app = await this.appsModel.findById(id);
+
+      await app.updateOne(data);
+
+      return {
+        success: true,
+        statusCode: 200,
+        data: app,
+        message: "App updated successfully"
+      }
+    } catch (err: any) {
+      console.error(err.message);
+      return {
+        success: false,
+        statusCode: 500,
+        message: "Something went wrong"
+      }
+    }
+  }
 }

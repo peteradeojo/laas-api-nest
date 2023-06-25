@@ -27,7 +27,9 @@ export class Log {
   })
   app: string;
 
-  @Prop()
+  @Prop({
+    required: false
+  })
   ip?: string;
 }
 

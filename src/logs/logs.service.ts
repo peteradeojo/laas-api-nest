@@ -14,15 +14,27 @@ export class LogsService {
     @InjectModel(Log.name) private readonly logModel: Model<Log>,
     private readonly config: ConfigService,
     @Inject(LogsGateway) private readonly logsGateway: LogsGateway,
-  ) {}
+  ) { }
 
   async getLogs(
     appId: string,
     page: number = 1,
     count: number = 20,
+    queryParams?: any,
   ): Promise<ServiceResponse> {
     const query = this.logModel.find({ app: appId });
-    const total = await query.clone().countDocuments().exec();
+    const total = query.clone();
+
+    if (queryParams?.level) {
+      query.where('level', queryParams.level);
+      total.where('level', queryParams.level).countDocuments();
+    }
+
+    if (queryParams?.search) {
+      query.where('text', new RegExp(`${queryParams.search}`, 'i'));
+      total.where('text', new RegExp(queryParams.search, 'i')).countDocuments();
+    }
+
     const logs = await query
       .skip((page - 1) * count)
       .limit(count)
@@ -33,7 +45,7 @@ export class LogsService {
       success: true,
       statusCode: 200,
       data: {
-        total,
+        total: await total.exec(),
         page,
         count,
         data: logs,

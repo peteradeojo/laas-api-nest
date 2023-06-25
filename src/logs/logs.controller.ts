@@ -28,7 +28,7 @@ export class LogsController {
     @Query() query,
   ): SentResponse {
     const { success, data, statusCode, message } =
-      await this.logService.getLogs(app, query.page, query.count);
+      await this.logService.getLogs(app, query.page, query.count, query);
 
     if (!success) {
       return res.status(statusCode).json({
