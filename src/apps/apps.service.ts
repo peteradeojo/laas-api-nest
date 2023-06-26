@@ -84,9 +84,10 @@ export class AppsService {
 
   async updateApp(id: string, data: AppsDto): Promise<ServiceResponse> {
     try {
-      const app = await this.appsModel.findById(id);
+      let app = await this.appsModel.findOneAndUpdate({_id: id}, data, { new: true });
 
-      await app.updateOne(data);
+      // app = 
+      // await app.updateOne(data, { new: true, rawResult: true }).exec();
 
       return {
         success: true,

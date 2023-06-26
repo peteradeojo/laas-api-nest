@@ -23,7 +23,7 @@ import { UsersService } from 'src/users/users.service';
 export class AppsModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer.apply(AuthMiddleware).forRoutes({
-      path: 'apps',
+      path: 'apps*',
       version: '*',
       method: RequestMethod.ALL,
     });
