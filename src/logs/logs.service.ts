@@ -23,16 +23,16 @@ export class LogsService {
     queryParams?: any,
   ): Promise<ServiceResponse> {
     const query = this.logModel.find({ app: appId });
-    const total = query.clone();
+    let total = query.clone();
 
     if (queryParams?.level) {
       query.where('level', queryParams.level);
-      total.where('level', queryParams.level).countDocuments();
+      total = total.where('level', queryParams.level); //.countDocuments();
     }
 
     if (queryParams?.search) {
       query.where('text', new RegExp(`${queryParams.search}`, 'i'));
-      total.where('text', new RegExp(queryParams.search, 'i')).countDocuments();
+      total = total.where('text', new RegExp(queryParams.search, 'i')); //.countDocuments();
     }
 
     const logs = await query
@@ -45,7 +45,7 @@ export class LogsService {
       success: true,
       statusCode: 200,
       data: {
-        total: await total.exec(),
+        total: await total.countDocuments().exec(),
         page,
         count,
         data: logs,
