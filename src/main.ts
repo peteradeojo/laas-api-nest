@@ -4,6 +4,8 @@ import { VersioningType, ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import helmet from 'helmet';
 
+const morgan = require('morgan');
+
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
@@ -14,6 +16,10 @@ async function bootstrap() {
 
   app.use(helmet());
   app.enableCors();
+
+  if (process.env.NODE_ENV !== 'production') {
+    app.use(morgan('dev'));
+  }
 
   app.useGlobalPipes(
     new ValidationPipe({

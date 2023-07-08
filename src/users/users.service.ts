@@ -17,6 +17,9 @@ export class UsersService {
 
   async findOne(query: object): Promise<Readonly<any>> {
     const user = await this.userModel.findOne(query);
+    if (!user) {
+      return undefined;
+    }
     user.password = undefined;
     return user;
   }
