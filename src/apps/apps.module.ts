@@ -6,6 +6,8 @@ import { App, AppsSchema } from './schema/apps.schema';
 import { AuthMiddleware } from 'src/auth/auth.middleware';
 import { User, UserSchema } from 'src/users/schema/user.schema';
 import { UsersService } from 'src/users/users.service';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { User as EUser, App as EApp } from 'src/typeorm/entities';
 
 @Module({
   imports: [
@@ -16,6 +18,7 @@ import { UsersService } from 'src/users/users.service';
       },
       { name: User.name, schema: UserSchema }
     ]),
+    TypeOrmModule.forFeature([EUser, EApp])
   ],
   controllers: [AppsController],
   providers: [AppsService, UsersService, AuthMiddleware],

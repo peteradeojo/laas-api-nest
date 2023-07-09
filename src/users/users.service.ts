@@ -1,41 +1,41 @@
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { User } from './schema/user.schema';
-import { Document, Model } from 'mongoose';
+import { User as EUser } from '../typeorm/entities/User';
 import { hashSync, compare } from 'bcrypt';
 import { ConfigService } from '@nestjs/config';
 import { sign } from 'jsonwebtoken';
 import { ServiceResponse } from 'src/interfaces/response.interface';
 import { LoginDTO, RegisterDTO } from 'src/auth/dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class UsersService {
   constructor(
     private configService: ConfigService,
-    @InjectModel(User.name) private readonly userModel: Model<User>,
-  ) { }
+    @InjectRepository(EUser) private readonly userRepository: Repository<EUser>,
+  ) {}
 
   async findOne(query: object): Promise<Readonly<any>> {
-    const user = await this.userModel.findOne(query);
+    const user = await this.userRepository.findOne({ where: query });
     if (!user) {
       return undefined;
     }
-    user.password = undefined;
+    // user.password = undefined;
     return user;
   }
 
-  async getUser(id: string | object): Promise<Document<any, any, User> | undefined> {
+  async getUser(id: string | object): Promise<any | undefined> {
     if (typeof id == 'object') {
-      const user = await this.userModel.findOne(id);
+      const user = await this.userRepository.findOne({ where: id, cache: 100 * 60 * 5 });
       return user;
     }
 
-    const user = await this.userModel.findById(id);
+    const user = await this.userRepository.findBy({ id });
     return user;
   }
 
-  async registerUser(data: RegisterDTO): Promise<ServiceResponse> {
-    if (await this.userModel.findOne({ email: data.email })) {
+  async registerUser(data: RegisterDTO): Promise<any> {
+    if (await this.userRepository.findOne({ where: { email: data.email } })) {
       return {
         success: false,
         statusCode: 400,
@@ -43,18 +43,20 @@ export class UsersService {
       };
     }
 
-    const user = new this.userModel(data);
-    user.password = hashSync(
-      data.password,
-      parseInt(this.configService.get<string>('BCRYPT_SALT', '10')),
-    );
-    await user.save();
+    const user = this.userRepository.create(data);
+    // return user;
+
+    user.password = hashSync(data.password, parseInt(this.configService.get<string>('BCRYPT_SALT', '10')));
+    await this.userRepository.save(user);
 
     return await this.authenticate(data);
   }
 
   async authenticate(data: LoginDTO): Promise<ServiceResponse> {
-    const user = await this.userModel.findOne({ email: data.email });
+    const user = await this.userRepository.findOne({
+      select: ['password', 'email', 'id'],
+      where: { email: data.email },
+    });
 
     if (!user) {
       return {
@@ -68,17 +70,10 @@ export class UsersService {
 
     if (result) {
       user.password = undefined;
-      const token = sign(
-        { id: user._id },
-        this.configService.get<string>('JWT_SECRET', 'secret'),
-        {
-          algorithm: 'HS256',
-          expiresIn: this.configService.get<string | number>(
-            'JWT_EXPIRY',
-            '1d',
-          ),
-        },
-      );
+      const token = sign({ id: user.id }, this.configService.get<string>('JWT_SECRET', 'secret'), {
+        algorithm: 'HS256',
+        expiresIn: this.configService.get<string | number>('JWT_EXPIRY', '1d'),
+      });
 
       return {
         success: true,
@@ -98,7 +93,7 @@ export class UsersService {
   }
 
   async getUserCount() {
-    return await this.userModel.countDocuments();
+    return await this.userRepository.count();
   }
 
   async getUsers(query: any): Promise<ServiceResponse> {
@@ -106,31 +101,30 @@ export class UsersService {
     const limit = query.count || 20;
 
     try {
-      let userquery = this.userModel.find({}); //.where({ role: { $ne: 'admin' } });
+      let userquery = this.userRepository.createQueryBuilder().cache(100 * 60 * 5);
 
       if (isRecent) {
-        const date = (new Date()).valueOf() - (1000 * 60 * 60 * 24 * 5)
-        userquery = userquery.where({ createdAt: { $gte: new Date(date) } }).limit(limit);
+        const date = new Date().valueOf() - 1000 * 60 * 60 * 24 * 5;
+        userquery = userquery.where('createdAt >= :createdAt', { createdAt: date.valueOf() }).take(limit);
       } else {
         const page = query.page || 1;
-        userquery = userquery.skip((page - 1) * limit).limit(limit);
+        userquery = userquery.skip((page - 1) * limit).take(limit);
       }
 
-      const users = await userquery.sort({ createdAt: -1 }).exec();
+      const users = await userquery.orderBy('createdAt').getMany();
 
       return {
         success: true,
         statusCode: 200,
         data: users,
         message: 'Users fetched successfully',
-      }
-
+      };
     } catch (err: any) {
       return {
         success: false,
         statusCode: 500,
         message: err.message,
-      }
+      };
     }
   }
 }

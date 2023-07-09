@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { VersioningType, ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import { corsOptions } from './util/config';
 import helmet from 'helmet';
 
 const morgan = require('morgan');
@@ -15,7 +16,7 @@ async function bootstrap() {
   });
 
   app.use(helmet());
-  app.enableCors();
+  app.enableCors(corsOptions());
 
   if (process.env.NODE_ENV !== 'production') {
     app.use(morgan('dev'));

@@ -6,16 +6,25 @@ import { AppsDto } from './dto/apps.dto';
 import { ServiceResponse } from 'src/interfaces/response.interface';
 import { sign } from 'jsonwebtoken';
 import { ConfigService } from '@nestjs/config';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { App as EApp } from 'src/typeorm/entities';
 
 @Injectable()
 export class AppsService {
   constructor(
     @InjectModel(App.name) private readonly appsModel: Model<App>,
+    @InjectRepository(EApp) private readonly appsRepository: Repository<EApp>,
     private configService: ConfigService,
-  ) { }
+  ) {}
 
   async getApps(userId: string): Promise<ServiceResponse> {
-    const apps = await this.appsModel.find({ user: userId }, '-user');
+    const apps = await this.appsRepository.find({
+      where: { user: { id: userId } },
+      relations: {
+        user: true,
+      },
+    });
 
     return {
       success: true,
@@ -25,7 +34,7 @@ export class AppsService {
   }
 
   async getApp(id: string): Promise<ServiceResponse> {
-    const app = await this.appsModel.findById(id);
+    const app = await this.appsRepository.findOneBy({ id });
 
     if (!app) {
       return {
@@ -42,13 +51,14 @@ export class AppsService {
     };
   }
 
-  async createApp(data: AppsDto) {
-    const app = new this.appsModel(data);
-    return await app.save();
+  async createApp(data: any) {
+    const app = this.appsRepository.create({ ...data });
+    // return app;
+    return await this.appsRepository.save(app);
   }
 
   async createAppToken(id: string): Promise<ServiceResponse> {
-    const app = await this.appsModel.findById(id);
+    const app = await this.appsRepository.findOneBy({ id });
 
     if (!app) {
       return {
@@ -60,7 +70,7 @@ export class AppsService {
 
     const token = sign(
       {
-        id: app._id,
+        id: app.id,
       },
       this.configService.get<string>('JWT_SECRET', 'secret'),
       {
@@ -69,7 +79,7 @@ export class AppsService {
     );
 
     app.token = token;
-    await app.save();
+    await this.appsRepository.save(app);
 
     return {
       success: true,
@@ -79,29 +89,25 @@ export class AppsService {
   }
 
   async getAppCount() {
-    return await this.appsModel.countDocuments();
+    return await this.appsRepository.count();
   }
 
   async updateApp(id: string, data: AppsDto): Promise<ServiceResponse> {
     try {
-      let app = await this.appsModel.findOneAndUpdate({_id: id}, data, { new: true });
-
-      // app = 
-      // await app.updateOne(data, { new: true, rawResult: true }).exec();
+      let app = (await this.appsRepository.update({ id: id }, data as any));
 
       return {
         success: true,
         statusCode: 200,
-        data: app,
-        message: "App updated successfully"
-      }
+        message: 'App updated successfully',
+      };
     } catch (err: any) {
       console.error(err.message);
       return {
         success: false,
         statusCode: 500,
-        message: "Something went wrong"
-      }
+        message: 'Something went wrong',
+      };
     }
   }
 }

@@ -9,12 +9,15 @@ import { AdminMiddleware } from './admin.middleware';
 import { AppsService } from 'src/apps/apps.service';
 import { ConfigService } from '@nestjs/config';
 import { App, AppsSchema } from 'src/apps/schema/apps.schema';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { User as UserEntity, App as AppEntity } from 'src/typeorm/entities';
 
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
     MongooseModule.forFeature([{ name: App.name, schema: AppsSchema }]),
-    AuthModule
+    AuthModule,
+    TypeOrmModule.forFeature([UserEntity, AppEntity]),
   ],
   controllers: [AdminController],
   providers: [UsersService, AppsService, ConfigService],
@@ -22,9 +25,12 @@ import { App, AppsSchema } from 'src/apps/schema/apps.schema';
 export class AdminModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer
-      .apply(AuthMiddleware, AdminMiddleware).exclude({
+      .apply(AuthMiddleware, AdminMiddleware)
+      .exclude({
         path: '/admin/auth/login',
-        method: RequestMethod.POST
-      }).forRoutes('admin');
+        version: '*',
+        method: RequestMethod.POST,
+      })
+      .forRoutes({ path: 'admin/*', version: '*', method: RequestMethod.ALL });
   }
 }

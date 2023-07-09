@@ -1,9 +1,4 @@
-import {
-  MiddlewareConsumer,
-  Module,
-  NestModule,
-  RequestMethod,
-} from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule, RequestMethod } from '@nestjs/common';
 import { LogsController } from './logs.controller';
 import { LogsService } from './logs.service';
 import { MongooseModule } from '@nestjs/mongoose';
@@ -12,20 +7,20 @@ import { AuthMiddleware } from 'src/auth/auth.middleware';
 import { UsersService } from 'src/users/users.service';
 import { User, UserSchema } from 'src/users/schema/user.schema';
 import { LogsGateway } from './logs.gateway';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { User as EUser, Log as LogEntity } from 'src/typeorm/entities';
 
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: Log.name, schema: LogsSchema }]),
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
+    TypeOrmModule.forFeature([EUser, LogEntity]),
   ],
   controllers: [LogsController],
   providers: [LogsService, UsersService, LogsGateway],
 })
 export class LogsModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer
-      .apply(AuthMiddleware)
-      .exclude({ path: 'logs', method: RequestMethod.POST })
-      .forRoutes(LogsController);
+    consumer.apply(AuthMiddleware).exclude({ path: 'logs', method: RequestMethod.POST }).forRoutes(LogsController);
   }
 }
