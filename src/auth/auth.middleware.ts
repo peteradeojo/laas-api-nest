@@ -21,7 +21,7 @@ export class AuthMiddleware implements NestMiddleware {
       return res.status(401).json({ message: 'Unauthorized' });
     }
 
-    const user = await this.userService.findOne({ id: payload.id });
+    const user = await this.userService.findOne({ id: payload.id }, 60 * 100);
     if (!user) {
       return res.status(401).json({ message: 'Unauthorized' });
     }

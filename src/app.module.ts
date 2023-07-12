@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
 import { AppsModule } from './apps/apps.module';
 import { LogsModule } from './logs/logs.module';
@@ -12,16 +12,20 @@ import { App, Log, User } from './typeorm/entities';
     ConfigModule.forRoot({
       isGlobal: true,
     }),
-    TypeOrmModule.forRoot({
-      type: 'mysql',
-      host: process.env.SQL_HOST,
-      port: parseInt(process.env.SQL_PORT),
-      username: process.env.SQL_USER,
-      password: process.env.SQL_PASSWORD,
-      database: process.env.SQL_DATABASE,
-      entities: [User, App, Log],
-      cache: true,
-      synchronize: true,
+    TypeOrmModule.forRootAsync({
+      imports: [],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        type: 'mysql',
+        host: process.env.SQL_HOST,
+        port: parseInt(process.env.SQL_PORT),
+        username: process.env.SQL_USER,
+        password: process.env.SQL_PASSWORD,
+        database: process.env.SQL_DATABASE,
+        entities: [User, App, Log],
+        cache: true,
+        synchronize: configService.get('NODE_ENV') == 'production' ? false : true,
+      })
     }),
     AuthModule,
     AppsModule,

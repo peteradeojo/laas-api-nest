@@ -12,7 +12,7 @@ export class AppsService {
   constructor(
     @InjectRepository(App) private readonly appsRepository: Repository<App>,
     private configService: ConfigService,
-  ) {}
+  ) { }
 
   async getApps(userId: string): Promise<ServiceResponse> {
     const apps = await this.appsRepository.find({
@@ -20,6 +20,7 @@ export class AppsService {
       relations: {
         user: true,
       },
+      cache: 60 * 100,
     });
 
     return {
@@ -84,8 +85,10 @@ export class AppsService {
     };
   }
 
-  async getAppCount() {
-    return await this.appsRepository.count();
+  async getAppCount(id?: string | number) {
+    return await this.appsRepository.count({
+      where: id ? { user: { id } } : {}
+    });
   }
 
   async updateApp(id: string, data: AppsDto): Promise<ServiceResponse> {

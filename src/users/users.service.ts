@@ -7,16 +7,17 @@ import { ServiceResponse } from 'src/interfaces/response.interface';
 import { LoginDTO, RegisterDTO } from 'src/auth/dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { UpdateUserDto } from './schema/user.schema';
 
 @Injectable()
 export class UsersService {
   constructor(
     private configService: ConfigService,
     @InjectRepository(User) private readonly userRepository: Repository<User>,
-  ) {}
+  ) { }
 
-  async findOne(query: object): Promise<Readonly<any>> {
-    const user = await this.userRepository.findOne({ where: query });
+  async findOne(query: object, cache: boolean | number = true): Promise<Readonly<any>> {
+    const user = await this.userRepository.findOne({ where: query, cache });
     if (!user) {
       return undefined;
     }
@@ -125,6 +126,17 @@ export class UsersService {
         statusCode: 500,
         message: err.message,
       };
+    }
+  }
+
+  async updateUser(id: string | number, body: Partial<UpdateUserDto>) {
+    try {
+      await this.userRepository.update({ id }, body);
+      return {
+        message: "User updated successfully",
+      };
+    } catch (err) {
+      throw err;
     }
   }
 }
