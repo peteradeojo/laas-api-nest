@@ -1,24 +1,22 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import { Log, LogLevels } from './schema/logs.schema';
+import { ConfigService } from '@nestjs/config';
+import { InjectRepository } from '@nestjs/typeorm';
+import { verify } from 'jsonwebtoken';
+import { Repository } from 'typeorm';
+import { LogLevels } from './schema/logs.schema';
 import { ServiceResponse } from 'src/interfaces/response.interface';
 import { CreateLogDto } from './dto/create-log.dto';
-import { verify } from 'jsonwebtoken';
-import { ConfigService } from '@nestjs/config';
 import { LogsGateway } from './logs.gateway';
-import { Log as LogEntity } from 'src/typeorm/entities';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Log } from 'src/typeorm/entities';
 
 @Injectable()
 export class LogsService {
   constructor(
-    @InjectModel(Log.name) private readonly logModel: Model<Log>,
+    // @InjectModel(Log.name) private readonly logModel: Model<Log>,
     private readonly config: ConfigService,
     @Inject(LogsGateway) private readonly logsGateway: LogsGateway,
-    @InjectRepository(LogEntity) private readonly logRepository: Repository<LogEntity>,
-  ) {}
+    @InjectRepository(Log) private readonly logRepository: Repository<Log>,
+  ) { }
 
   async getLogs(appId: string, page: number = 1, count: number = 20, queryParams?: any): Promise<ServiceResponse> {
     const query = this.logRepository.createQueryBuilder('logs').where('app = :appId', { appId });
@@ -53,11 +51,11 @@ export class LogsService {
   }
 
   async deleteLog(id: string) {
-    await this.logModel.findByIdAndDelete(id);
+    await this.logRepository.delete({ id });
   }
 
   async clearLogs(app: string) {
-    await this.logModel.deleteMany({ app });
+    await this.logRepository.delete({ app });
   }
 
   private verifyAppToken(token: string): string {
@@ -68,7 +66,8 @@ export class LogsService {
   async saveLog(data: CreateLogDto, appToken: string): Promise<ServiceResponse> {
     data.app = this.verifyAppToken(appToken);
     data.level ??= LogLevels.DEBUG;
-    const log = await this.logModel.create(data);
+    const log = this.logRepository.create(data);
+    await this.logRepository.save(log);
 
     this.logsGateway.sendLog(data.app, log);
 

@@ -1,12 +1,11 @@
 import { Module } from '@nestjs/common';
-import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
 import { AppsModule } from './apps/apps.module';
 import { LogsModule } from './logs/logs.module';
 import { AdminModule } from './admin/admin.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { App, User } from './typeorm/entities';
+import { App, Log, User } from './typeorm/entities';
 
 @Module({
   imports: [
@@ -20,11 +19,10 @@ import { App, User } from './typeorm/entities';
       username: process.env.SQL_USER,
       password: process.env.SQL_PASSWORD,
       database: process.env.SQL_DATABASE,
-      entities: [User, App],
+      entities: [User, App, Log],
       cache: true,
       synchronize: true,
     }),
-    MongooseModule.forRoot(process.env.MONGO_URI),
     AuthModule,
     AppsModule,
     LogsModule,
@@ -33,4 +31,4 @@ import { App, User } from './typeorm/entities';
   controllers: [],
   providers: [],
 })
-export class AppModule {}
+export class AppModule { }

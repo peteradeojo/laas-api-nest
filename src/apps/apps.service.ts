@@ -1,20 +1,16 @@
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import { App } from './schema/apps.schema';
 import { AppsDto } from './dto/apps.dto';
 import { ServiceResponse } from 'src/interfaces/response.interface';
 import { sign } from 'jsonwebtoken';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { App as EApp } from 'src/typeorm/entities';
+import { App } from 'src/typeorm/entities';
 
 @Injectable()
 export class AppsService {
   constructor(
-    @InjectModel(App.name) private readonly appsModel: Model<App>,
-    @InjectRepository(EApp) private readonly appsRepository: Repository<EApp>,
+    @InjectRepository(App) private readonly appsRepository: Repository<App>,
     private configService: ConfigService,
   ) {}
 

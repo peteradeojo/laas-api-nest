@@ -2,22 +2,17 @@ import { MiddlewareConsumer, Module, NestModule, RequestMethod } from '@nestjs/c
 import { AdminController } from './admin.controller';
 import { AuthModule } from './auth/auth.module';
 import { AuthMiddleware } from 'src/auth/auth.middleware';
-import { User, UserSchema } from 'src/users/schema/user.schema';
-import { MongooseModule } from '@nestjs/mongoose';
 import { UsersService } from 'src/users/users.service';
 import { AdminMiddleware } from './admin.middleware';
 import { AppsService } from 'src/apps/apps.service';
 import { ConfigService } from '@nestjs/config';
-import { App, AppsSchema } from 'src/apps/schema/apps.schema';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { User as UserEntity, App as AppEntity } from 'src/typeorm/entities';
+import { User, App } from 'src/typeorm/entities';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
-    MongooseModule.forFeature([{ name: App.name, schema: AppsSchema }]),
+    TypeOrmModule.forFeature([User, App]),
     AuthModule,
-    TypeOrmModule.forFeature([UserEntity, AppEntity]),
   ],
   controllers: [AdminController],
   providers: [UsersService, AppsService, ConfigService],

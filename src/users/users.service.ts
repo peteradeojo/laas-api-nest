@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { User as EUser } from '../typeorm/entities/User';
+import { User } from '../typeorm/entities/User';
 import { hashSync, compare } from 'bcrypt';
 import { ConfigService } from '@nestjs/config';
 import { sign } from 'jsonwebtoken';
@@ -12,7 +12,7 @@ import { Repository } from 'typeorm';
 export class UsersService {
   constructor(
     private configService: ConfigService,
-    @InjectRepository(EUser) private readonly userRepository: Repository<EUser>,
+    @InjectRepository(User) private readonly userRepository: Repository<User>,
   ) {}
 
   async findOne(query: object): Promise<Readonly<any>> {
