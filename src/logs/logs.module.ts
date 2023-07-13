@@ -8,9 +8,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User, Log } from 'src/typeorm/entities';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([User, Log]),
-  ],
+  imports: [TypeOrmModule.forFeature([User, Log])],
   controllers: [LogsController],
   providers: [LogsService, UsersService, LogsGateway],
 })

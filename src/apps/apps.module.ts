@@ -9,9 +9,7 @@ import { ProfileController } from 'src/profile/profile.controller';
 import { ProfileService } from 'src/profile/profile.service';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([User, App])
-  ],
+  imports: [TypeOrmModule.forFeature([User, App])],
   controllers: [AppsController, ProfileController],
   providers: [AppsService, UsersService, AuthMiddleware, ProfileService],
 })

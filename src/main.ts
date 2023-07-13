@@ -30,7 +30,12 @@ async function bootstrap() {
   );
 
   // Swaggwer Setup
-  const config = new DocumentBuilder().setTitle('LAAS API').setDescription('Logging API for the LAAS project').setVersion('1.0').addTag('logs').build();
+  const config = new DocumentBuilder()
+    .setTitle('LAAS API')
+    .setDescription('Logging API for the LAAS project')
+    .setVersion('1.0')
+    .addTag('logs')
+    .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('docs', app, document);
 

@@ -6,18 +6,15 @@ import { UsersService } from 'src/users/users.service';
 
 @Controller('profile')
 export class ProfileController {
-  constructor(
-    private readonly userService: UsersService,
-    private readonly appsService: AppsService
-  ) { }
+  constructor(private readonly userService: UsersService, private readonly appsService: AppsService) {}
 
   @Get('/')
   async getProfile(@Req() req: any) {
     const { data } = await this.appsService.getApps(req.user.id);
     return {
       user: req.user,
-      apps: data.apps
-    }
+      apps: data.apps,
+    };
   }
 
   @Patch('/')

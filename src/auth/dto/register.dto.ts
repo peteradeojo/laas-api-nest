@@ -1,9 +1,4 @@
-import {
-  IsEmail,
-  IsNotEmpty,
-  IsString,
-  ValidateIf,
-} from 'class-validator';
+import { IsEmail, IsNotEmpty, IsString, ValidateIf } from 'class-validator';
 import { PickType } from '@nestjs/mapped-types';
 
 export class RegisterDTO {

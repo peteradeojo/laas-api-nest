@@ -5,7 +5,7 @@ import { UsersService } from 'src/users/users.service';
 
 @Injectable()
 export class AuthMiddleware implements NestMiddleware {
-  constructor(private userService: UsersService) { }
+  constructor(private userService: UsersService) {}
 
   async use(req: Request, res: Response, next: NextFunction) {
     let bearerToken = req.headers.authorization;

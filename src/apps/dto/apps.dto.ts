@@ -1,10 +1,12 @@
 import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class AppsDto {
-  @IsNotEmpty() @IsString()
+  @IsNotEmpty()
+  @IsString()
   readonly title: string;
 
-  @IsOptional() @IsString()
+  @IsOptional()
+  @IsString()
   readonly description?: string;
 
   user?: string;

@@ -2,7 +2,7 @@ import { IsNotEmpty, IsOptional, IsString, IsStrongPassword, ValidateIf } from '
 
 export enum UserRole {
   USER = 'user',
-  ADMIN = 'admin'
+  ADMIN = 'admin',
 }
 
 export class UpdateUserDto {

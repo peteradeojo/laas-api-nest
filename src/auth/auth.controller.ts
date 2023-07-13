@@ -9,8 +9,7 @@ export class AuthController {
 
   @Post('register')
   async register(@Body() body: RegisterDTO, @Res() res: Response) {
-    const { success, statusCode, data, message } =
-      await this.authService.register(body);
+    const { success, statusCode, data, message } = await this.authService.register(body);
 
     if (!success) {
       return res.status(statusCode).json({
@@ -26,9 +25,7 @@ export class AuthController {
 
   @Post('login')
   async login(@Body() body: LoginDTO, @Res() res: Response) {
-    const { statusCode, success, data, message } = await this.authService.login(
-      body,
-    );
+    const { statusCode, success, data, message } = await this.authService.login(body);
 
     if (success) {
       return res.status(200).json({

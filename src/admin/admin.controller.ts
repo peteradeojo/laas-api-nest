@@ -5,10 +5,7 @@ import { UsersService } from 'src/users/users.service';
 
 @Controller('admin')
 export class AdminController {
-  constructor(
-    private readonly userService: UsersService,
-    private readonly appService: AppsService,
-  ) { }
+  constructor(private readonly userService: UsersService, private readonly appService: AppsService) {}
 
   @Get('analytics')
   async analytics(@Res() res: Response) {
@@ -22,8 +19,8 @@ export class AdminController {
         },
         apps: {
           total: appCount,
-        }
-      }
+        },
+      },
     });
   }
 
@@ -33,7 +30,7 @@ export class AdminController {
 
     return res.status(result.statusCode).json({
       data: result.data,
-      message: result.message
+      message: result.message,
     });
   }
 
@@ -48,8 +45,8 @@ export class AdminController {
 
     if (!user) {
       return res.status(404).json({
-        message: 'user not found'
-      })
+        message: 'user not found',
+      });
     }
 
     return res.status(200).json({ ...user._doc, apps: userApps.data?.apps ?? [] });

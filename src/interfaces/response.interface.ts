@@ -1,4 +1,4 @@
-import { Response } from "express";
+import { Response } from 'express';
 
 export interface ServiceResponse<T = any> {
   success: boolean;

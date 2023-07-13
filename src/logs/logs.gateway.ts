@@ -27,10 +27,7 @@ export class LogsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   @SubscribeMessage('join')
-  handleJoin(
-    @ConnectedSocket() socket: Socket,
-    @MessageBody() data: string,
-  ): void {
+  handleJoin(@ConnectedSocket() socket: Socket, @MessageBody() data: string): void {
     // console.log('joining room ' + data);
     socket.join(data);
   }

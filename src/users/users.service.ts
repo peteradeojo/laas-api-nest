@@ -14,7 +14,7 @@ export class UsersService {
   constructor(
     private configService: ConfigService,
     @InjectRepository(User) private readonly userRepository: Repository<User>,
-  ) { }
+  ) {}
 
   async findOne(query: object, cache: boolean | number = true): Promise<Readonly<any>> {
     const user = await this.userRepository.findOne({ where: query, cache });
@@ -133,7 +133,7 @@ export class UsersService {
     try {
       await this.userRepository.update({ id }, body);
       return {
-        message: "User updated successfully",
+        message: 'User updated successfully',
       };
     } catch (err) {
       throw err;

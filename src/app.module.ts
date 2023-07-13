@@ -25,7 +25,7 @@ import { App, Log, User } from './typeorm/entities';
         entities: [User, App, Log],
         cache: true,
         synchronize: configService.get('NODE_ENV') == 'production' ? false : true,
-      })
+      }),
     }),
     AuthModule,
     AppsModule,
@@ -35,4 +35,4 @@ import { App, Log, User } from './typeorm/entities';
   controllers: [],
   providers: [],
 })
-export class AppModule { }
+export class AppModule {}

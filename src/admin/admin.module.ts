@@ -10,10 +10,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User, App } from 'src/typeorm/entities';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([User, App]),
-    AuthModule,
-  ],
+  imports: [TypeOrmModule.forFeature([User, App]), AuthModule],
   controllers: [AdminController],
   providers: [UsersService, AppsService, ConfigService],
 })

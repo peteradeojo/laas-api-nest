@@ -16,7 +16,7 @@ export class LogsService {
     private readonly config: ConfigService,
     @Inject(LogsGateway) private readonly logsGateway: LogsGateway,
     @InjectRepository(Log) private readonly logRepository: Repository<Log>,
-  ) { }
+  ) {}
 
   async getLogs(appId: string, page: number = 1, count: number = 20, queryParams?: any): Promise<ServiceResponse> {
     const query = this.logRepository.createQueryBuilder('logs').where('app = :appId', { appId });
