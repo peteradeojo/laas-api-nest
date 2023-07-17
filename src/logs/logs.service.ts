@@ -19,7 +19,7 @@ export class LogsService {
   ) {}
 
   async getLogs(appId: string, page: number = 1, count: number = 20, queryParams?: any): Promise<ServiceResponse> {
-    const query = this.logRepository.createQueryBuilder('logs').where('app = :appId', { appId });
+    const query = this.logRepository.createQueryBuilder('logs').where('appId = :appId', { appId });
     let total = query.clone();
 
     if (queryParams?.level) {
