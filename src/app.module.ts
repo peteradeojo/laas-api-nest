@@ -24,7 +24,7 @@ import { App, Log, User } from './typeorm/entities';
         database: process.env.SQL_DATABASE,
         entities: [User, App, Log],
         cache: true,
-        synchronize: configService.get('NODE_ENV') == 'production' ? false : true,
+        synchronize: true,
       }),
     }),
     AuthModule,

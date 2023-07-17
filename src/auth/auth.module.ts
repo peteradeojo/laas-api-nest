@@ -16,21 +16,10 @@ export class AuthModule implements NestModule {
     consumer
       .apply(AuthMiddleware)
       .exclude(
-        {
-          path: '/auth/register',
-          version: '*',
-          method: RequestMethod.ALL,
-        },
-        {
-          path: '/auth/login',
-          version: '*',
-          method: RequestMethod.ALL,
-        },
+        'v1/auth/register',
+        'v1/auth/login',
+        'v1/auth/2fa/verify',
       )
-      .forRoutes({
-        path: '/auth',
-        version: '*',
-        method: RequestMethod.GET,
-      });
+      .forRoutes('/v1/auth*');
   }
 }

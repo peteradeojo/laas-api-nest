@@ -43,4 +43,10 @@ export class User {
 
   @OneToMany(() => App, (app) => app.user)
   apps: App[];
+
+  @Column({ nullable: true, default: false, select: false })
+  twoFactorSecret: string;
+
+  @Column({ nullable: true, default: false })
+  twoFactorEnabled: boolean;
 }

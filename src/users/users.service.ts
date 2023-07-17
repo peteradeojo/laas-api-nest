@@ -2,12 +2,14 @@ import { Injectable } from '@nestjs/common';
 import { User } from '../typeorm/entities/User';
 import { hashSync, compare } from 'bcrypt';
 import { ConfigService } from '@nestjs/config';
-import { sign } from 'jsonwebtoken';
+import { sign, verify } from 'jsonwebtoken';
 import { ServiceResponse } from 'src/interfaces/response.interface';
 import { LoginDTO, RegisterDTO } from 'src/auth/dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UpdateUserDto } from './schema/user.schema';
+
+const speakeasy = require('speakeasy');
 
 @Injectable()
 export class UsersService {
@@ -53,9 +55,9 @@ export class UsersService {
     return await this.authenticate(data);
   }
 
-  async authenticate(data: LoginDTO): Promise<ServiceResponse> {
+  async authenticate(data: LoginDTO, ignore2FA: boolean = false): Promise<ServiceResponse> {
     const user = await this.userRepository.findOne({
-      select: ['password', 'email', 'id'],
+      select: ['password', 'email', 'id', 'twoFactorEnabled'],
       where: { email: data.email },
     });
 
@@ -69,8 +71,22 @@ export class UsersService {
 
     const result = await compare(data.password, user.password);
 
-    if (result) {
+    if (result || ignore2FA) {
       user.password = undefined;
+
+      if (!ignore2FA) {
+        if (user.twoFactorEnabled) {
+          return {
+            success: true,
+            statusCode: 200,
+            data: {
+              twoFactorEnabled: true,
+              // user,
+            },
+          };
+        }
+      }
+
       const token = sign({ id: user.id }, this.configService.get<string>('JWT_SECRET', 'secret'), {
         algorithm: 'HS256',
         expiresIn: this.configService.get<string | number>('JWT_EXPIRY', '1d'),
@@ -81,7 +97,7 @@ export class UsersService {
         statusCode: 200,
         data: {
           token,
-          user,
+          // user,
         },
       };
     }
@@ -138,5 +154,74 @@ export class UsersService {
     } catch (err) {
       throw err;
     }
+  }
+
+  async enable2fa(user: User, secret: string): Promise<ServiceResponse<User>> {
+    user.twoFactorEnabled = true;
+    user.twoFactorSecret = sign(
+      {
+        secret,
+      },
+      this.configService.get<string>('JWT_SECRET'),
+      {
+        algorithm: 'HS256',
+      },
+    );
+
+    try {
+      await this.userRepository.save(user);
+      return {
+        success: true,
+        statusCode: 200,
+        message: '2FA enabled successfully',
+        data: user,
+      };
+    } catch (err) {
+      return {
+        success: false,
+        statusCode: 500,
+        message: err.message,
+      };
+    }
+  }
+
+  async validate2fa(email: string, token: string): Promise<ServiceResponse> {
+    const user = await this.userRepository.findOne({ where: { email }, select: ['twoFactorSecret'] });
+
+    if (!user) {
+      return {
+        success: false,
+        statusCode: 400,
+        message: 'Invalid credentials',
+      };
+    }
+
+    const userSecret = verify(user.twoFactorSecret, this.configService.get<string>('JWT_SECRET'), {
+      algorithms: ['HS256'],
+    });
+
+    if (typeof userSecret == 'string') {
+      return {
+        success: false,
+        statusCode: 400,
+        message: 'Invalid credentials',
+      };
+    }
+
+    const verified = speakeasy.totp.verify({
+      secret: userSecret.secret,
+      encoding: 'base32',
+      token,
+    });
+
+    if (verified) {
+      return await this.authenticate({ email, password: '' }, true);
+    }
+
+    return {
+      success: false,
+      statusCode: 400,
+      message: 'Invalid token',
+    };
   }
 }

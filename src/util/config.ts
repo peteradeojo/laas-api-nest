@@ -5,7 +5,6 @@ export const corsOptions = () => {
     allowedOrigins.push('http://localhost:3000', 'http://localhost:5173');
   }
 
-  console.log(allowedOrigins);
   return {
     origin: allowedOrigins,
   };
