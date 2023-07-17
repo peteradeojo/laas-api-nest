@@ -17,6 +17,14 @@ export class AuthService {
   }
 
   async enable2fa(user: User, secret: string): Promise<ServiceResponse> {
+    if (user.twoFactorEnabled) {
+      return {
+        success: false,
+        statusCode: 400,
+        message: '2FA already enabled',
+      };
+    }
+    
     return await this.userService.enable2fa(user, secret);
   }
 
