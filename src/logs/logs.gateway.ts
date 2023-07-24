@@ -20,7 +20,7 @@ export class LogsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   server: Server;
 
   handleConnection(socket: Socket): void {
-    console.log('connected ' + socket.id);
+    // console.log('connected ' + socket.id);
   }
 
   handleDisconnect(socket: Socket): void {
