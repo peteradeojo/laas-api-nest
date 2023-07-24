@@ -5,12 +5,13 @@ import { AuthMiddleware } from 'src/auth/auth.middleware';
 import { UsersService } from 'src/users/users.service';
 import { LogsGateway } from './logs.gateway';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { User, Log } from 'src/typeorm/entities';
+import { User, Log, App } from 'src/typeorm/entities';
+import { AppsService } from 'src/apps/apps.service';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User, Log])],
+  imports: [TypeOrmModule.forFeature([User, Log, App])],
   controllers: [LogsController],
-  providers: [LogsService, UsersService, LogsGateway],
+  providers: [LogsService, UsersService, AppsService, LogsGateway],
 })
 export class LogsModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

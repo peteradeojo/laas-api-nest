@@ -19,7 +19,7 @@ export class Log {
   level: string;
 
   @ManyToOne(() => App)
-  app: string;
+  app: string|number;
 
   @Column({ type: 'varchar', length: 1024 })
   text: string;

@@ -6,6 +6,7 @@ import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { App } from 'src/typeorm/entities';
+import { v4 as uuid } from 'uuid';
 
 @Injectable()
 export class AppsService {
@@ -65,15 +66,16 @@ export class AppsService {
       };
     }
 
-    const token = sign(
-      {
-        id: app.id,
-      },
-      this.configService.get<string>('JWT_SECRET', 'secret'),
-      {
-        algorithm: 'HS256',
-      },
-    );
+    // const token = sign(
+    //   {
+    //     id: app.id,
+    //   },
+    //   this.configService.get<string>('JWT_SECRET', 'secret'),
+    //   {
+    //     algorithm: 'HS256',
+    //   },
+    // );
+    const token = uuid();
 
     app.token = token;
     await this.appsRepository.save(app);
@@ -108,5 +110,9 @@ export class AppsService {
         message: 'Something went wrong',
       };
     }
+  }
+
+  async getAppByToken(token: string): Promise<App> {
+    return await this.appsRepository.findOneBy({ token });
   }
 }

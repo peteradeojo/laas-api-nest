@@ -32,8 +32,8 @@ export class LogsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     socket.join(data);
   }
 
-  sendLog(app: string, log: any): void {
+  sendLog(app: string|number, log: any): void {
     // console.log('sending log');
-    this.server.to(app).emit('log', log);
+    this.server.to(`app-${app}`).emit('log', log);
   }
 }

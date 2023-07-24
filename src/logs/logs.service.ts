@@ -8,29 +8,33 @@ import { ServiceResponse } from 'src/interfaces/response.interface';
 import { CreateLogDto } from './dto/create-log.dto';
 import { LogsGateway } from './logs.gateway';
 import { Log } from 'src/typeorm/entities';
+import { AppsService } from 'src/apps/apps.service';
 
 @Injectable()
 export class LogsService {
   constructor(
-    // @InjectModel(Log.name) private readonly logModel: Model<Log>,
     private readonly config: ConfigService,
+    private readonly appService: AppsService,
     @Inject(LogsGateway) private readonly logsGateway: LogsGateway,
     @InjectRepository(Log) private readonly logRepository: Repository<Log>,
   ) {}
 
   async getLogs(appId: string, page: number = 1, count: number = 20, queryParams?: any): Promise<ServiceResponse> {
-    const query = this.logRepository.createQueryBuilder('logs').where('appId = :appId', { appId });
+    let query = this.logRepository.createQueryBuilder('logs').where('appId = :appId', { appId });
     let total = query.clone();
 
     if (queryParams?.level) {
-      query.where('level', queryParams.level);
+      query = query.where('level = :level', { level: queryParams.level });
       // total = total.where('level', queryParams.level); //.countDocuments();
     }
 
-    if (queryParams?.search) {
-      query.where('text Like %:search%', { search: queryParams.search });
-      // total = total.where('text', new RegExp(queryParams.search, 'i')); //.countDocuments();
-    }
+    // if (queryParams?.search) {
+      query = query.where('text like :search', { search: `${queryParams.search}%` });
+    //   // total = total.where('text', new RegExp(queryParams.search, 'i')); //.countDocuments();
+    // }
+
+    // log the raw sql to console
+    // console.log(query.printSql());
 
     const logs = await query
       .skip((page - 1) * count)
@@ -58,13 +62,20 @@ export class LogsService {
     await this.logRepository.delete({ app });
   }
 
-  private verifyAppToken(token: string): string {
-    const payload = verify(token, this.config.get<string>('JWT_SECRET', 'secret'));
-    return (payload as any).id;
+  private async verifyAppToken(token: string): Promise<string | number> {
+    // const payload = verify(token, this.config.get<string>('JWT_SECRET', 'secret'));
+    // return (payload as any).id;
+    const app = await this.appService.getAppByToken(token);
+
+    if (!app) {
+      throw new Error('Invalid app token');
+    }
+
+    return app.id;
   }
 
   async saveLog(data: CreateLogDto, appToken: string): Promise<ServiceResponse> {
-    data.app = this.verifyAppToken(appToken);
+    data.app = await this.verifyAppToken(appToken);
     data.level ??= LogLevels.DEBUG;
     const log = this.logRepository.create(data);
     await this.logRepository.save(log);

@@ -1,4 +1,4 @@
-import { IsIP, IsIn, IsOptional, IsString } from 'class-validator';
+import { IsIP, IsIn, IsNumber, IsOptional, IsString } from 'class-validator';
 import { LogLevels } from '../schema/logs.schema';
 
 export class CreateLogDto {
@@ -11,8 +11,9 @@ export class CreateLogDto {
   level?: string;
 
   @IsString()
+  @IsNumber()
   @IsOptional()
-  app: string;
+  app: string | number;
 
   @IsIP()
   @IsOptional()
