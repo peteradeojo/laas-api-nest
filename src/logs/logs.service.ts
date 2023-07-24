@@ -24,12 +24,12 @@ export class LogsService {
     let total = query.clone();
 
     if (queryParams?.level) {
-      query = query.where('level = :level', { level: queryParams.level });
+      query = query.andWhere('level = :level', { level: queryParams.level });
       // total = total.where('level', queryParams.level); //.countDocuments();
     }
 
     // if (queryParams?.search) {
-      query = query.where('text like :search', { search: `${queryParams.search}%` });
+      query = query.andWhere('text like :search', { search: `${queryParams.search}%` });
     //   // total = total.where('text', new RegExp(queryParams.search, 'i')); //.countDocuments();
     // }
 
@@ -59,7 +59,9 @@ export class LogsService {
   }
 
   async clearLogs(app: string) {
-    await this.logRepository.delete({ app });
+    console.log(app);
+    const result = await this.logRepository.delete({ app });
+    console.log(result);
   }
 
   private async verifyAppToken(token: string): Promise<string | number> {
@@ -80,7 +82,7 @@ export class LogsService {
     const log = this.logRepository.create(data);
     await this.logRepository.save(log);
 
-    this.logsGateway.sendLog(data.app, log);
+    this.logsGateway.sendLog(data.app as string, log);
 
     return {
       success: true,

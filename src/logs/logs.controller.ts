@@ -49,7 +49,7 @@ export class LogsController {
 
     body.ip ??= req.ip;
 
-    const { success, statusCode, data, message } = await this.logService.saveLog(body, appToken as string);
+    const { statusCode, data, message } = await this.logService.saveLog(body, appToken as string);
 
     return res.status(statusCode).json({
       message,

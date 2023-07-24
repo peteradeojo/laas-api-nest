@@ -15,11 +15,12 @@ import { Server, Socket } from 'socket.io';
   },
 })
 export class LogsGateway implements OnGatewayConnection, OnGatewayDisconnect {
+
   @WebSocketServer()
   server: Server;
 
   handleConnection(socket: Socket): void {
-    // console.log('connected ' + socket.id);
+    console.log('connected ' + socket.id);
   }
 
   handleDisconnect(socket: Socket): void {
@@ -32,8 +33,8 @@ export class LogsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     socket.join(data);
   }
 
-  sendLog(app: string|number, log: any): void {
-    // console.log('sending log');
-    this.server.to(`app-${app}`).emit('log', log);
+  sendLog(appToken: string, log: any): void {
+    console.log('sending log to ' + appToken);
+    this.server.to(appToken).emit('log', log);
   }
 }
