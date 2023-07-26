@@ -70,6 +70,7 @@ export class LogsService {
     const app = await this.appService.getAppByToken(token);
 
     if (!app) {
+      return;
       throw new Error('Invalid app token');
     }
 
@@ -77,7 +78,16 @@ export class LogsService {
   }
 
   async saveLog(data: CreateLogDto, appToken: string): Promise<ServiceResponse> {
-    data.app = await this.verifyAppToken(appToken);
+    const app = await this.verifyAppToken(appToken);
+
+    if (!app) {
+      return {
+        success: false,
+        statusCode: 200,
+        message: 'Invalid app token',
+      };
+    }
+
     data.level ??= LogLevels.DEBUG;
     const log = this.logRepository.create(data);
     await this.logRepository.save(log);
