@@ -15,6 +15,13 @@ import { AppsService } from 'src/apps/apps.service';
 })
 export class LogsModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(AuthMiddleware).exclude({ path: 'logs', method: RequestMethod.POST }).forRoutes(LogsController);
+    consumer
+      .apply(AuthMiddleware)
+      .exclude({
+        path: 'logs',
+        version: '*',
+        method: RequestMethod.POST,
+      })
+      .forRoutes(LogsController);
   }
 }
