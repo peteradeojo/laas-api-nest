@@ -71,3 +71,6 @@ Nest is an MIT-licensed open source project. It can grow thanks to the sponsors 
 ## License
 
 Nest is [MIT licensed](LICENSE).
+
+## Get started
+Create an account at [Lags](https://lags.vercel.app)
