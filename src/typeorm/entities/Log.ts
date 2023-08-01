@@ -13,13 +13,13 @@ export class Log {
 
   @Column({
     type: 'enum',
-    enum: LogLevels,
+    enum: ['unknown', ...Object.values(LogLevels)],
     default: LogLevels.INFO,
   })
   level: string;
 
   @ManyToOne(() => App)
-  app: string|number;
+  app: string | number;
 
   @Column({ type: 'varchar', length: 1024 })
   text: string;
@@ -35,4 +35,10 @@ export class Log {
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @Column({
+    type: 'varchar',
+    nullable: true,
+  })
+  tag?: string;
 }

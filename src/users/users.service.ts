@@ -55,7 +55,7 @@ export class UsersService {
     return await this.authenticate(data);
   }
 
-  async authenticate(data: LoginDTO, ignore2FA: boolean = false): Promise<ServiceResponse> {
+  async authenticate(data: LoginDTO, ignore2FA = false): Promise<ServiceResponse> {
     const user = await this.userRepository.findOne({
       select: ['password', 'email', 'id', 'twoFactorEnabled'],
       where: { email: data.email },

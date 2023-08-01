@@ -16,7 +16,7 @@ import { App, Log, User } from './typeorm/entities';
       imports: [],
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
-        type: 'mysql',
+        type: (process.env.DB_TYPE as any) || 'mysql',
         host: process.env.SQL_HOST,
         port: parseInt(process.env.SQL_PORT),
         username: process.env.SQL_USER,

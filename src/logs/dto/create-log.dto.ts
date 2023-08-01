@@ -6,9 +6,12 @@ export class CreateLogDto {
   text: string;
 
   @IsString()
-  @IsIn(Object.values(LogLevels))
   @IsOptional()
   level?: string;
+
+  @IsString()
+  @IsOptional()
+  tag?: string;
 
   @IsString()
   @IsNumber()
