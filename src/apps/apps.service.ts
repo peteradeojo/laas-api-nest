@@ -7,6 +7,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { App } from 'src/typeorm/entities';
 import { v4 as uuid } from 'uuid';
+import { LogsService } from 'src/logs/logs.service';
 
 @Injectable()
 export class AppsService {
@@ -95,7 +96,7 @@ export class AppsService {
 
   async updateApp(id: string, data: AppsDto): Promise<ServiceResponse> {
     try {
-      let app = await this.appsRepository.update({ id: id }, data as any);
+      const app = await this.appsRepository.update({ id: id }, data as any);
 
       return {
         success: true,
@@ -114,5 +115,15 @@ export class AppsService {
 
   async getAppByToken(token: string): Promise<App> {
     return await this.appsRepository.findOneBy({ token });
+  }
+
+  public async verifyAppToken(token: string): Promise<string | number> {
+    const app = await this.getAppByToken(token);
+
+    if (!app) {
+      return;
+    }
+
+    return app.id;
   }
 }

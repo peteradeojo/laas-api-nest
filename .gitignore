@@ -37,3 +37,5 @@ lerna-debug.log*
 .env
 
 ormconfig.json
+roadmap.md
+algo.md

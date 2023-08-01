@@ -1,37 +1,33 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { InjectRepository } from '@nestjs/typeorm';
-import { verify } from 'jsonwebtoken';
-import { Repository } from 'typeorm';
+import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
+import { EntityManager, Repository } from 'typeorm';
 import { LogLevels } from './schema/logs.schema';
 import { ServiceResponse } from 'src/interfaces/response.interface';
 import { CreateLogDto } from './dto/create-log.dto';
 import { LogsGateway } from './logs.gateway';
 import { Log } from 'src/typeorm/entities';
-import { AppsService } from 'src/apps/apps.service';
 
 @Injectable()
 export class LogsService {
   constructor(
-    private readonly config: ConfigService,
-    private readonly appService: AppsService,
     @Inject(LogsGateway) private readonly logsGateway: LogsGateway,
     @InjectRepository(Log) private readonly logRepository: Repository<Log>,
+    @InjectEntityManager() private readonly repository: EntityManager,
   ) {}
 
-  async getLogs(appId: string, page: number = 1, count: number = 20, queryParams?: any): Promise<ServiceResponse> {
+  async getLogs(appId: string, page = 1, count = 20, queryParams?: any): Promise<ServiceResponse> {
     let query = this.logRepository.createQueryBuilder('logs').where('appId = :appId', { appId });
     let total = query.clone();
 
     if (queryParams?.level) {
       query = query.andWhere('level = :level', { level: queryParams.level });
-      // total = total.where('level', queryParams.level); //.countDocuments();
+      total = total.andWhere('level = :level', { level: queryParams.level }); //.countDocuments();
     }
 
-    // if (queryParams?.search) {
+    if (queryParams?.search) {
       query = query.andWhere('text like :search', { search: `${queryParams.search}%` });
-    //   // total = total.where('text', new RegExp(queryParams.search, 'i')); //.countDocuments();
-    // }
+      total = total.andWhere('text like :search', { search: `${queryParams.search}%` }); //.countDocuments();
+    }
 
     // log the raw sql to console
     // console.log(query.printSql());
@@ -64,40 +60,28 @@ export class LogsService {
     console.log(result);
   }
 
-  private async verifyAppToken(token: string): Promise<string | number> {
-    // const payload = verify(token, this.config.get<string>('JWT_SECRET', 'secret'));
-    // return (payload as any).id;
-    const app = await this.appService.getAppByToken(token);
-
-    if (!app) {
-      return;
-      throw new Error('Invalid app token');
-    }
-
-    return app.id;
-  }
-
   async saveLog(data: CreateLogDto, appToken: string): Promise<ServiceResponse> {
-    const app = await this.verifyAppToken(appToken);
-
-    if (!app) {
-      return {
-        success: false,
-        statusCode: 200,
-        message: 'Invalid app token',
-      };
-    }
-
     data.level ??= LogLevels.DEBUG;
     const log = this.logRepository.create(data);
     await this.logRepository.save(log);
 
-    this.logsGateway.sendLog(data.app as string, log);
+    this.logsGateway.sendLog(log.app as string, log);
 
     return {
       success: true,
       statusCode: 200,
       data: log,
     };
+  }
+
+  async getAppMetrics(id: string | number) {
+    try {
+      const data = await this.repository.query('SELECT count(id), level from logs where appId = ? GROUP BY level', [
+        id,
+      ]);
+      return data;
+    } catch (err: any) {
+      return { message: err.message };
+    }
   }
 }

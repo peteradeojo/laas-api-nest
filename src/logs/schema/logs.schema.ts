@@ -4,4 +4,5 @@ export enum LogLevels {
   ERROR = 'error',
   DEBUG = 'debug',
   FATAL = 'fatal',
+  // UNKNOWN = 'unknown',
 }

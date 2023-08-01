@@ -15,11 +15,7 @@ export class AuthModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer
       .apply(AuthMiddleware)
-      .exclude(
-        'v1/auth/register',
-        'v1/auth/login',
-        'v1/auth/2fa/verify',
-      )
+      .exclude('v1/auth/register', 'v1/auth/login', 'v1/auth/2fa/verify')
       .forRoutes('/v1/auth*');
   }
 }

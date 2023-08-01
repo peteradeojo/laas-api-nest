@@ -18,9 +18,7 @@ export class AdminModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer
       .apply(AuthMiddleware, AdminMiddleware)
-      .exclude(
-        'v1/admin/auth/login',
-      )
+      .exclude('v1/admin/auth/login')
       .forRoutes({ path: 'admin/*', version: '*', method: RequestMethod.ALL });
   }
 }

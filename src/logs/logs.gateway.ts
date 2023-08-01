@@ -15,7 +15,6 @@ import { Server, Socket } from 'socket.io';
   },
 })
 export class LogsGateway implements OnGatewayConnection, OnGatewayDisconnect {
-
   @WebSocketServer()
   server: Server;
 

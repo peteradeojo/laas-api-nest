@@ -24,7 +24,7 @@ export class AuthService {
         message: '2FA already enabled',
       };
     }
-    
+
     return await this.userService.enable2fa(user, secret);
   }
 

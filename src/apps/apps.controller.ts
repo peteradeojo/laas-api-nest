@@ -2,10 +2,11 @@ import { Body, Controller, Post, Get, Req, Res, Param, Patch, UseInterceptors } 
 import { AppsDto } from './dto/apps.dto';
 import { AppsService } from 'src/apps/apps.service';
 import { Request, Response } from 'express';
+import { LogsService } from 'src/logs/logs.service';
 
 @Controller('apps')
 export class AppsController {
-  constructor(private readonly appsService: AppsService) {}
+  constructor(private readonly appsService: AppsService, private readonly logService: LogsService) {}
 
   @Post('/new')
   async newApp(@Body() body: AppsDto, @Req() req: Request, @Res() res: Response): Promise<Response> {
@@ -32,6 +33,13 @@ export class AppsController {
       message: 'Apps fetched successfully',
       data: data.apps,
     });
+  }
+
+  @Get(':id/metrics')
+  async getAppMetrics(@Param('id') id: string, @Res() res: Response) {
+    const metrics = await this.logService.getAppMetrics(id);
+
+    return res.json(metrics);
   }
 
   @Get(':id')
