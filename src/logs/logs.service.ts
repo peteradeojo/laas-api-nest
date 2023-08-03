@@ -76,9 +76,7 @@ export class LogsService {
 
   async getAppMetrics(id: string | number) {
     try {
-      const data = await this.repository.query('SELECT count(id), level from logs where appId = ? GROUP BY level', [
-        id,
-      ]);
+      const data = await this.repository.query('SELECT * from metrics metric where metric.appId = ?;', [id]);
       return data;
     } catch (err: any) {
       return { message: err.message };

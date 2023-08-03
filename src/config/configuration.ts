@@ -1,5 +1,4 @@
 import bcrypt from 'bcrypt';
-import { Metric } from 'src/typeorm/entities/Metric';
 import { DataSourceOptions } from 'typeorm';
 
 export default {
