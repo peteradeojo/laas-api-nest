@@ -8,19 +8,19 @@ if (process.env.NODE_ENV !== 'production') {
 import { gatherMetrics } from './metric-collator';
 
 console.log('Starting tasks');
-// const task = cron.schedule('*/10 * * * *', async() => {
-//     console.log("Running task");
-//     await gatherMetrics();
-// }, {
-//     timezone: "Africa/Lagos"
-// });
-// task.start();
-
-setInterval(async () => {
-  console.log('Running task');
-  try {
+const task = cron.schedule('*/10 * * * *', async() => {
+    console.log("Running task");
     await gatherMetrics();
-  } catch (err) {
-    console.error(err);
-  }
-}, 10000);
+}, {
+    timezone: "Africa/Lagos"
+});
+task.start();
+
+// setInterval(async () => {
+//   console.log('Running task');
+//   try {
+//     await gatherMetrics();
+//   } catch (err) {
+//     console.error(err);
+//   }
+// }, 10000);
