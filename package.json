@@ -20,7 +20,8 @@
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "typeorm": "typeorm-ts-node-commonjs",
     "runner:dev": "nodemon -r tsconfig-paths/register src/runners/index.ts",
-    "start-all": "npm-run-all -p start:dev runner:dev"
+    "runner": "node dist/runners/index.js",
+    "start-all": "npm-run-all -p start:prod runner"
   },
   "dependencies": {
     "@nestjs/common": "^9.0.0",
