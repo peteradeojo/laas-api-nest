@@ -1,4 +1,3 @@
-// import cron from 'node-cron';
 const cron = require('node-cron');
 
 if (process.env.NODE_ENV !== 'production') {
@@ -16,11 +15,13 @@ const task = cron.schedule('*/10 * * * *', async() => {
 });
 task.start();
 
-// setInterval(async () => {
-//   console.log('Running task');
-//   try {
-//     await gatherMetrics();
-//   } catch (err) {
-//     console.error(err);
-//   }
-// }, 10000);
+if (process.env.NODE_ENV === 'development') {
+  setInterval(async () => {
+    console.log('Running task');
+    try {
+      await gatherMetrics();
+    } catch (err) {
+      console.error(err);
+    }
+  }, 10000);
+}

@@ -86,7 +86,7 @@ async function* appGenerator(count: number) {
   let current = 1;
   while (current <= count) {
     try {
-      const apps = await datasource.manager.query<AppType[]>('SELECT * from apps limit ? offset ?;', [
+      const apps = await datasource.manager.query<AppType[]>('SELECT * from apps order by id limit ? offset ?;', [
         count,
         (current - 1) * count,
       ]);
