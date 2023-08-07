@@ -4,6 +4,8 @@ const date = require('date-and-time');
 import { dbOptions } from '../config/configuration';
 import { Metric } from '../typeorm/entities/Metric';
 import { App, Log, User } from 'src/typeorm/entities';
+
+console.log(dbOptions);
 const datasource = new DataSource({ ...dbOptions, entities: [Metric, App, User, Log] });
 
 const momentFormat = 'YYYY-MM-DD HH:mm:ss';
