@@ -12,18 +12,6 @@ const momentFormat = 'YYYY-MM-DD HH:mm:ss';
 
 const now = () => date.format(new Date(), momentFormat);
 
-type DateEntity = {
-  createdAt?: Date;
-  updatedAt?: Date;
-};
-
-type AppType = {
-  id: number;
-  token?: string;
-  title: string;
-  userId: number;
-} & DateEntity;
-
 type LogStat = {
   weight: number;
   level: string;
@@ -86,10 +74,15 @@ async function* appGenerator(count: number) {
   let current = 1;
   while (current <= count) {
     try {
-      const apps = await datasource.manager.query<AppType[]>('SELECT * from apps order by id limit ? offset ?;', [
-        count,
-        (current - 1) * count,
-      ]);
+      const query = datasource.createQueryBuilder(App, 'app');
+
+      query.select('*').orderBy('id').limit(count).offset((current - 1) * count);
+      // const apps = await datasource.manager.query<AppType[]>('SELECT * from apps order by id limit ? offset ?;', [
+      //   count,
+      //   (current - 1) * count,
+      // ]);
+      console.log(query.getQueryAndParameters());
+      const apps = await query.getRawMany<App>();
 
       current += 1;
 
@@ -109,10 +102,9 @@ async function* appGenerator(count: number) {
   }
 }
 
-const getLogStats = async (app: AppType, timebound = false) => {
+const getLogStats = async (app: Partial<App>, timebound = false) => {
   const manager = datasource.manager;
   const time = date.format(date.addMinutes(new Date(), -30), momentFormat);
-  // console.log(time);
 
   const query = manager.createQueryBuilder(Log, 'log');
 
@@ -126,7 +118,7 @@ const getLogStats = async (app: AppType, timebound = false) => {
 
   const stats = await query.getRawMany();
 
-  if (stats.length > 0) await saveLogMetrics(stats, app.id);
+  if (stats.length > 0) await saveLogMetrics(stats, app.id as number);
 };
 
 export const gatherMetrics = async () => {
