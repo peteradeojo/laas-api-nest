@@ -5,6 +5,8 @@ export default {
   bcrypt: bcrypt,
 };
 
+console.log(process.env.NODE_ENV);
+
 export const dbOptions = (): DataSourceOptions => ({
   type: (process.env.DB_TYPE as any) || 'mysql',
   host: process.env.SQL_HOST,
