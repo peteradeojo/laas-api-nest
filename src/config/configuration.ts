@@ -5,7 +5,7 @@ export default {
   bcrypt: bcrypt,
 };
 
-export const dbOptions: DataSourceOptions = {
+export const dbOptions = (): DataSourceOptions => ({
   type: (process.env.DB_TYPE as any) || 'mysql',
   host: process.env.SQL_HOST,
   port: parseInt(process.env.SQL_PORT),
@@ -13,4 +13,4 @@ export const dbOptions: DataSourceOptions = {
   password: process.env.SQL_PASSWORD,
   database: process.env.SQL_DATABASE,
   cache: true,
-};
+});
