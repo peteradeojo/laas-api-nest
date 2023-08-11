@@ -1,12 +1,11 @@
-import { DataSource, EntityTarget, ObjectLiteral } from 'typeorm';
+import { DataSource, DataSourceOptions, EntityTarget, ObjectLiteral } from 'typeorm';
 const date = require('date-and-time');
 
 import { dbOptions } from '../config/configuration';
 import { Metric } from '../typeorm/entities/Metric';
 import { App, Log, User } from 'src/typeorm/entities';
 
-console.log(dbOptions());
-const datasource = new DataSource({ ...(dbOptions()), entities: [Metric, App, User, Log] });
+const datasource = new DataSource({ ...dbOptions(), entities: [Metric, App, User, Log] });
 
 const momentFormat = 'YYYY-MM-DD HH:mm:ss';
 
@@ -20,12 +19,18 @@ type LogStat = {
 
 async function checkTableExists(table: string | EntityTarget<ObjectLiteral>) {
   if (typeof table == 'string') {
-    const result = await datasource.manager.query(
-      'SELECT * FROM information_schema.tables WHERE table_schema = ? AND table_name = ? LIMIT 1;',
-      [process.env.SQL_DATABASE, table],
-    );
+    const queryRunner = datasource.manager.createQueryBuilder().select('*').from('information_schema.tables', 'tables');
 
-    return result.length > 0;
+    queryRunner.where('table_schema = :schema AND table_name = :table', { schema: process.env.SQL_DATABASE, table });
+    const result = await queryRunner.getRawOne();
+
+    if (result) {
+      console.log('Table exists');
+      return true;
+    } else {
+      console.log('Table does not exist');
+      return false;
+    }
   } else {
     return datasource.hasMetadata('metrics');
   }
@@ -33,6 +38,7 @@ async function checkTableExists(table: string | EntityTarget<ObjectLiteral>) {
 
 async function createMetricsTable() {
   try {
+    const query = datasource.manager.createQueryBuilder();
     await datasource.manager.query(
       "CREATE TABLE `metrics` (`id` int NOT NULL AUTO_INCREMENT, `level` enum ('info', 'warn', 'error', 'debug', 'fatal', 'unknown') NOT NULL, `weight` int NOT NULL DEFAULT '0', `createdAt` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP(), `updatedAt` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP(), `appId` int NULL, `saveDate` datetime, PRIMARY KEY (`id`)) ENGINE=InnoDB",
     );
@@ -40,10 +46,6 @@ async function createMetricsTable() {
 }
 
 async function saveLogMetrics(stats: LogStat[], appId?: number) {
-  if (!(await checkTableExists('metrics'))) {
-    await createMetricsTable();
-  }
-
   // console.log(stats.length);
 
   let query = 'INSERT INTO `metrics` (`level`, `weight`, `saveDate`, `createdAt`, `updatedAt`, `appId`) VALUES ';
@@ -76,12 +78,11 @@ async function* appGenerator(count: number) {
     try {
       const query = datasource.createQueryBuilder(App, 'app');
 
-      query.select('*').orderBy('id').limit(count).offset((current - 1) * count);
-      // const apps = await datasource.manager.query<AppType[]>('SELECT * from apps order by id limit ? offset ?;', [
-      //   count,
-      //   (current - 1) * count,
-      // ]);
-      console.log(query.getQueryAndParameters());
+      query
+        .select('*')
+        .orderBy('app.id')
+        .limit(count)
+        .skip((current - 1) * count);
       const apps = await query.getRawMany<App>();
 
       current += 1;
@@ -106,9 +107,17 @@ const getLogStats = async (app: Partial<App>, timebound = false) => {
   const manager = datasource.manager;
   const time = date.format(date.addMinutes(new Date(), -30), momentFormat);
 
+  console.log(app);
+
   const query = manager.createQueryBuilder(Log, 'log');
 
-  query.select('count(level)', 'weight').addSelect('max(createdAt)', 'createdAt').addSelect('level', 'level').where('log.appId = :appId', { appId: app.id });
+  query
+    .select('count(level)', 'weight')
+    .addSelect('max(log.createdAt)', 'createdAt')
+    .addSelect('level', 'level')
+    .where('log.appId = :appId', { appId: app.id });
+
+  console.log(query.getQuery());
 
   if (timebound) {
     query.andWhere('log.createdAt >= :time', { time });
@@ -117,6 +126,8 @@ const getLogStats = async (app: Partial<App>, timebound = false) => {
   query.groupBy('level');
 
   const stats = await query.getRawMany();
+
+  console.log(stats.length);
 
   if (stats.length > 0) await saveLogMetrics(stats, app.id as number);
 };
@@ -127,13 +138,28 @@ export const gatherMetrics = async () => {
       await datasource.initialize();
     }
 
+    const tableExists = await checkTableExists('metrics');
+
     // const manager = datasource.manager;
     // const { count } = await manager.query('SELECT count(id) as count from apps where token is not null');
+    const timebound = process.env.NODE_ENV != 'development';
 
     for await (const chunk of appGenerator(20)) {
-      chunk.forEach(async (app) => await getLogStats(app, true));
+      chunk.forEach(async (app) => await getLogStats(app, timebound));
     }
   } catch (err) {
     console.error(err);
   }
 };
+
+export class MetricsCollator {
+  protected datasource: DataSource;
+
+  constructor(datasourceOptions?: DataSourceOptions) {
+    if (datasourceOptions) {
+      this.datasource = new DataSource(datasourceOptions);
+    } else {
+      this.datasource = new DataSource(dbOptions());
+    }
+  }
+}

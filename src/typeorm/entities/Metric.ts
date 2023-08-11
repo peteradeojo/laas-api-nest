@@ -1,4 +1,4 @@
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 import { App } from './App';
 
 @Entity()
@@ -17,4 +17,13 @@ export class Metric {
 
   @Column({ type: 'int', default: 0 })
   weight: number;
+
+  @CreateDateColumn()
+  createdAt: Date;
+  
+  @UpdateDateColumn()
+  updatedAt: Date;
+
+  @Column({ type: 'timestamp', nullable: true })
+  saveDate: Date;
 }
